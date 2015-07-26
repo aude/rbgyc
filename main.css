@@ -1,0 +1,41 @@
+body {
+	margin: 0;
+	height: 100vh;
+}
+
+header {
+	background-color: red;
+	width: 100%;
+	font-size: 2em;
+}
+
+header ul {
+	margin: 0;
+	display: flex;
+	justify-content: space-around;
+}
+
+header ul li {
+	margin: 0 0.5em;
+	list-style-type: none;
+}
+
+section {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+div {
+	padding: 2em;
+}
+
+.show {
+	width: 6.4em;
+}
+
+.info {
+	width: 20em;
+}
