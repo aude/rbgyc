@@ -6,15 +6,49 @@ var i, c,
 	],
 	hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
 
+function renderRGB(rgb) {
+	var i, c,
+		out = 'rgb(';
+	for (i = 0, c = rgb.length; i < c; ++i) {
+		out += Math.round(rgb[i] * 255).toString() +
+				(i < c-1 ? ',' : '');
+	}
+	out += ')';
+	return out;
+}
+
+function renderCMY(cmy) {
+	var out = 'CMY: ';
+	for (i = 0, c = cmy.length; i < c; ++i) {
+		// precision: 0.1
+		out +=
+			(Math.round(cmy[i] * 100 * 10) / 10).toString() + '%' +
+			(i == c-1 ? '' : ' ');
+	}
+	return out;
+}
+
+function renderCMYK(cmyk) {
+	var out = 'CMYK: ';
+	for (i = 0, c = cmyk.length; i < c; ++i) {
+		// precision: 0.1
+		out +=
+			(Math.round(cmyk[i] * 100 * 10) / 10).toString() + '%' +
+			(i == c-1 ? '' : ' ');
+	}
+	return out;
+}
+
 function updateShow(id, rgb) {
-	document.getElementById(id).style.backgroundColor = 'rgb(' + rgb[0].toString() + ',' + rgb[1].toString() + ',' + rgb[2].toString() + ')';
+	document.getElementById(id).style.backgroundColor = renderRGB(rgb);
 }
 
 function RGBtoHEX(rgb) {
 	var i,
 		out = '#';
 	for (i = 0; i <= 2; ++i) {
-		out += hex[Math.floor(rgb[i]/16) % 16] + hex[rgb[i] % 16];
+		out += hex[Math.floor(Math.round(rgb[i] * 255) / 16) % 16] +
+				hex[Math.round(rgb[i] * 255) % 16];
 	}
 	return out;
 }
@@ -24,9 +58,9 @@ function RGBtoCMYK(rgb) {
 	var c, m, y, k,
 		_r, _g, _b;
 
-	_r = rgb[0] / 255;
-	_g = rgb[1] / 255;
-	_b = rgb[2] / 255;
+	_r = rgb[0];
+	_g = rgb[1];
+	_b = rgb[2];
 
 	k = 1 - Math.max(_r, Math.max(_g, _b));
 
@@ -47,9 +81,9 @@ function RGBtoCMY(rgb) {
 	var c, m, y,
 		_r, _g, _b;
 
-	_r = rgb[0] / 255;
-	_g = rgb[1] / 255;
-	_b = rgb[2] / 255;
+	_r = rgb[0];
+	_g = rgb[1];
+	_b = rgb[2];
 
 	k = 1 - Math.max(_r, Math.max(_g, _b));
 
@@ -69,78 +103,77 @@ function CMYKtoRGB(_c, _m, _y, _k) {
 	// RGB is just inverted RGB, with Key added (optionally, as we're in an ideal world: on a computer)
 	var r, g, b;
 	// ~http://www.rapidtables.com/convert/color/cmyk-to-rgb.htm
-	r = Math.round(255 * (1 - _c) * (1 - _k));
-	g = Math.round(255 * (1 - _m) * (1 - _k));
-	b = Math.round(255 * (1 - _y) * (1 - _k));
+	r = (1 - _c) * (1 - _k);
+	g = (1 - _m) * (1 - _k);
+	b = (1 - _y) * (1 - _k);
 	return [r, g, b];
 }
 
 function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	var r, g, b;
-	// r = Math.round((Math.max(_r - _g, 0) / 100) * 255).toString();
-	// g = Math.round((Math.max(_g - _r, 0) / 100) * 255).toString();
 
 	// init
 	r = 0;
 	g = 0;
 	b = 0;
 
-	// apply red, which is RGB(255,0,0)
-	r += _r * (255 / 100);
-	g += _g * (0 / 100);
-	b += _b * (0 / 100);
-	// apply blue, which is RGB(0,0,255)
-	r += _r * (0 / 100);
-	g += _g * (0 / 100);
-	b += _b * (255 / 100);
-	// apply green, which is RGB(0,255,0)
-	r += _r * (0 / 100);
-	g += _g * (255 / 100);
-	b += _b * (0 / 100);
-	// apply yellow, which is RGB(255,255,0)
+	// apply red, which is RGB(1,0,0)
+	r += _r * 1;
+	g += _g * 0;
+	b += _b * 0;
+	// apply blue, which is RGB(0,0,1)
+	r += _r * 0;
+	g += _g * 0;
+	b += _b * 1;
+	// apply green, which is RGB(0,1,0)
+	r += _r * 0;
+	g += _g * 1;
+	b += _b * 0;
+	// apply yellow, which is RGB(1,1,0)
 	// r += _y * (255 / 100 / 2);
 	// g += _y * (255 / 100 / 2);
 	// b += _y * (0 / 100 / 2);
-	r += _y * (255 / 100);
-	g += _y * (255 / 100);
+	r += _y * 1;
+	g += _y * 1;
+	b += _y * 0;
 	var diff;
-	if (r > 255) {
-		diff = r - 255;
+	if (r > 1) {
+		diff = r - 1;
 		r -= diff;
 		g -= diff / 2;
 	}
-	if (g > 255) {
-		diff = g - 255;
+	if (g > 1) {
+		diff = g - 1;
 		r -= diff / 2;
 		g -= diff;
 	}
-	// apply key, which is RGB(0,0,0)-RGB(255,255,255)
+	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
 	// r += _c * (255 / 100);
 	// g += _c * (255 / 100);
 	// b += _c * (255 / 100);
-	r += _c / 100 * r;
-	g += _c * (g / 100);
-	b += _c * (b / 100);
-	if (r > 255) {
-		diff = r - 255;
+	r += _c * r;
+	g += _c * g;
+	b += _c * b;
+	if (r > 1) {
+		diff = r - 1;
 		r -= diff;
-		g += diff / 255 * (255 - g);
-		b += diff / 255 * (255 - b);
+		g += diff / 1 * (1 - g);
+		b += diff / 1 * (1 - b);
 	}
-	if (g > 255) {
-		diff = g - 255;
-		r += diff / 255 * (255 - r);
+	if (g > 1) {
+		diff = g - 1;
+		r += diff / 1 * (1 - r);
 		g -= diff;
-		b += diff / 255 * (255 - b);
+		b += diff / 1 * (1 - b);
 	}
-	if (b > 255) {
-		diff = b - 255;
-		r += diff / 255 * (255 - r);
-		g += diff / 255 * (255 - g);
+	if (b > 1) {
+		diff = b - 1;
+		r += diff / 1 * (1 - r);
+		g += diff / 1 * (1 - g);
 		b -= diff;
 	}
 
-	return [Math.round(r), Math.round(g), Math.round(b)];
+	return [r, g, b];
 }
 
 function updateInfo(id, rgb) {
@@ -149,41 +182,22 @@ function updateInfo(id, rgb) {
 		cmyk, hsv, hsl, rbgyc;
 
 	document.getElementById(id + '-hex').textContent = RGBtoHEX(rgb);
-
-	out = 'rgb(';
-	for (i = 0, c = rgb.length; i < c; ++i) {
-		out += rgb[i].toString() + (i < c-1 ? ',' : '');
-	}
-	out += ')';
-	document.getElementById(id + '-rgb').textContent = out;
-
-	cmy = RGBtoCMY(rgb);
-	out = 'CMY: ';
-	for (i = 0, c = cmy.length; i < c; ++i) {
-		out +=
-			(Math.round(cmy[i] * 100 * 10) / 10).toString() + '%' +
-			(i == c-1 ? '' : ' ');
-	}
-	document.getElementById(id + '-cmy').textContent = out;
-
-	cmyk = RGBtoCMYK(rgb);
-	out = 'CMYK: ';
-	for (i = 0, c = cmyk.length; i < c; ++i) {
-		out +=
-			(Math.round(cmyk[i] * 100 * 10) / 10).toString() + '%' +
-			(i == c-1 ? '' : ' ');
-	}
-	document.getElementById(id + '-cmyk').textContent = out;
+	document.getElementById(id + '-rgb').textContent = renderRGB(rgb);
+	document.getElementById(id + '-cmy').textContent = renderCMY(RGBtoCMY(rgb));
+	document.getElementById(id + '-cmyk').textContent = renderCMYK(RGBtoCMYK(rgb));
 }
 
 function updateRGB() {
 	var i, rgb;
+
 	i = 0 - 2;
+	// go from 0-100 to 0-1
 	rgb = [
-		parseInt(document.getElementById(observeIds[i+=2]).value, 10),
-		parseInt(document.getElementById(observeIds[i+=2]).value, 10),
-		parseInt(document.getElementById(observeIds[i+=2]).value, 10)
+		parseInt(document.getElementById(observeIds[i+=2]).value, 10) / 255,
+		parseInt(document.getElementById(observeIds[i+=2]).value, 10) / 255,
+		parseInt(document.getElementById(observeIds[i+=2]).value, 10) / 255
 	];
+
 	updateShow('show-rgb', rgb);
 	updateInfo('rgb', rgb);
 }
@@ -213,11 +227,12 @@ function updateRBGYC() {
 		r, b, g, y, c;
 
 	i = 14 - 2;
-	r = parseFloat(document.getElementById(observeIds[i+=2]).value, 10);
-	b = parseFloat(document.getElementById(observeIds[i+=2]).value, 10);
-	g = parseFloat(document.getElementById(observeIds[i+=2]).value, 10);
-	y = parseFloat(document.getElementById(observeIds[i+=2]).value, 10);
-	c = parseFloat(document.getElementById(observeIds[i+=2]).value, 10);
+	// go from 0-100 to 0-1
+	r = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
+	b = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
+	g = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
+	y = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
+	c = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
 
 	updateShow('show-rbgyc', RBGYCtoRGB(r, b, g, y, c));
 	updateInfo('rbgyc', RBGYCtoRGB(r, b, g, y, c));
