@@ -105,14 +105,14 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	g += _y * (255 / 100);
 	var diff;
 	if (r > 255) {
-		diff = (r - 255) / 2;
+		diff = r - 255;
 		r -= diff;
-		g -= diff;
+		g -= diff / 2;
 	}
 	if (g > 255) {
-		diff = (g - 255) / 2;
+		diff = g - 255;
 		g -= diff;
-		r -= diff;
+		r -= diff / 2;
 	}
 	// apply key, which is RGB(0,0,0)-RGB(255,255,255)
 	r += _c * (255 / 100);
