@@ -111,13 +111,34 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	}
 	if (g > 255) {
 		diff = g - 255;
-		g -= diff;
 		r -= diff / 2;
+		g -= diff;
 	}
 	// apply key, which is RGB(0,0,0)-RGB(255,255,255)
-	r += _c * (255 / 100);
-	g += _c * (255 / 100);
-	b += _c * (255 / 100);
+	// r += _c * (255 / 100);
+	// g += _c * (255 / 100);
+	// b += _c * (255 / 100);
+	r += _c / 100 * r;
+	g += _c * (g / 100);
+	b += _c * (b / 100);
+	if (r > 255) {
+		diff = r - 255;
+		r -= diff;
+		g += diff / 255 * (255 - g);
+		b += diff / 255 * (255 - b);
+	}
+	if (g > 255) {
+		diff = g - 255;
+		r += diff / 255 * (255 - r);
+		g -= diff;
+		b += diff / 255 * (255 - b);
+	}
+	if (b > 255) {
+		diff = b - 255;
+		r += diff / 255 * (255 - r);
+		g += diff / 255 * (255 - g);
+		b -= diff;
+	}
 
 	return [Math.round(r), Math.round(g), Math.round(b)];
 }
