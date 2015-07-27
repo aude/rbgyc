@@ -110,7 +110,8 @@ function CMYKtoRGB(_c, _m, _y, _k) {
 }
 
 function RBGYCtoRGB(_r, _b, _g, _y, _c) {
-	var r, g, b;
+	var r, g, b,
+		diff;
 
 	// init
 	r = 0;
@@ -130,13 +131,9 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	g += _g * 1;
 	b += _b * 0;
 	// apply yellow, which is RGB(1,1,0)
-	// r += _y * (255 / 100 / 2);
-	// g += _y * (255 / 100 / 2);
-	// b += _y * (0 / 100 / 2);
 	r += _y * 1;
 	g += _y * 1;
 	b += _y * 0;
-	var diff;
 	if (r > 1) {
 		diff = r - 1;
 		r -= diff;
@@ -148,28 +145,25 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 		g -= diff;
 	}
 	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
-	// r += _c * (255 / 100);
-	// g += _c * (255 / 100);
-	// b += _c * (255 / 100);
 	r += _c * r;
 	g += _c * g;
 	b += _c * b;
 	if (r > 1) {
 		diff = r - 1;
 		r -= diff;
-		g += diff / 1 * (1 - g);
-		b += diff / 1 * (1 - b);
+		g += diff * (1 - g);
+		b += diff * (1 - b);
 	}
 	if (g > 1) {
 		diff = g - 1;
-		r += diff / 1 * (1 - r);
+		r += diff * (1 - r);
 		g -= diff;
-		b += diff / 1 * (1 - b);
+		b += diff * (1 - b);
 	}
 	if (b > 1) {
 		diff = b - 1;
-		r += diff / 1 * (1 - r);
-		g += diff / 1 * (1 - g);
+		r += diff * (1 - r);
+		g += diff * (1 - g);
 		b -= diff;
 	}
 
