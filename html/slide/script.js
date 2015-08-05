@@ -122,14 +122,23 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	r += _r * 1;
 	g += _g * 0;
 	b += _b * 0;
-	// apply blue, which is RGB(0,0,1)
-	r += _r * 0;
-	g += _g * 0;
-	b += _b * 1;
 	// apply green, which is RGB(0,1,0)
 	r += _r * 0;
 	g += _g * 1;
 	b += _b * 0;
+	// when red and green is neutralizing each other, they will tend to white;
+	// thus, blue must be added, and must be equal to the least of _r and _g.
+	b += Math.min(_r, _g) * 1;
+	// apply blue, which is RGB(0,0,1)
+	r += _r * 0;
+	g += _g * 0;
+	b += _b * 1;
+	if (b > 1) {
+		diff = b - 1;
+		r -= diff;
+		g -= diff;
+		b -= diff;
+	}
 	// apply yellow, which is RGB(1,1,0)
 	r += _y * 1;
 	g += _y * 1;
@@ -137,35 +146,47 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 	if (r > 1) {
 		diff = r - 1;
 		r -= diff;
-		g -= diff / 2;
-	}
-	if (g > 1) {
-		diff = g - 1;
-		r -= diff / 2;
 		g -= diff;
-	}
-	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
-	r += _c * r;
-	g += _c * g;
-	b += _c * b;
-	if (r > 1) {
-		diff = r - 1;
-		r -= diff;
-		g += diff * (1 - g);
-		b += diff * (1 - b);
-	}
-	if (g > 1) {
-		diff = g - 1;
-		r += diff * (1 - r);
-		g -= diff;
-		b += diff * (1 - b);
-	}
-	if (b > 1) {
-		diff = b - 1;
-		r += diff * (1 - r);
-		g += diff * (1 - g);
 		b -= diff;
 	}
+	if (g > 1) {
+		diff = g - 1;
+		r -= diff;
+		g -= diff;
+		b -= diff;
+	}
+	// if (r > 1) {
+	// 	diff = r - 1;
+	// 	r -= diff;
+	// 	g -= diff / 2;
+	// }
+	// if (g > 1) {
+	// 	diff = g - 1;
+	// 	r -= diff / 2;
+	// 	g -= diff;
+	// }
+	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
+	// r += _c * r;
+	// g += _c * g;
+	// b += _c * b;
+	// if (r > 1) {
+	// 	diff = r - 1;
+	// 	r -= diff;
+	// 	g += diff * (1 - g);
+	// 	b += diff * (1 - b);
+	// }
+	// if (g > 1) {
+	// 	diff = g - 1;
+	// 	r += diff * (1 - r);
+	// 	g -= diff;
+	// 	b += diff * (1 - b);
+	// }
+	// if (b > 1) {
+	// 	diff = b - 1;
+	// 	r += diff * (1 - r);
+	// 	g += diff * (1 - g);
+	// 	b -= diff;
+	// }
 
 	return [r, g, b];
 }
