@@ -1,10 +1,54 @@
 var i, c,
+	primaryColors = [
+		[1, 0, 0],
+		[0, 0, 1],
+		[0, 1, 0],
+		[1, 1, 0]
+	],
+	neutralColor = [1, 1, 1],
 	observeIds = [
 		'rgb-rt', 'rgb-rs', 'rgb-gt', 'rgb-gs', 'rgb-bt', 'rgb-bs',
 		'cmyk-ct', 'cmyk-cs', 'cmyk-mt', 'cmyk-ms', 'cmyk-yt', 'cmyk-ys', 'cmyk-kt', 'cmyk-ks',
 		'rbgyc-rt', 'rbgyc-rs', 'rbgyc-bt', 'rbgyc-bs', 'rbgyc-gt', 'rbgyc-gs', 'rbgyc-yt', 'rbgyc-ys', 'rbgyc-ct', 'rbgyc-cs'
 	],
 	hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+
+function mixRGB(rgbA, weightA, rgbB, weightB) {
+	var r = 0,
+		g = 0,
+		b = 0,
+		diff;
+
+	if (weightA === 0 && weightB === 0) {
+		return neutralColor;
+	}
+
+	r = (rgbA[0] * weightA + rgbB[0] * weightB) / (weightA + weightB);
+	g = (rgbA[1] * weightA + rgbB[1] * weightB) / (weightA + weightB);
+	b = (rgbA[2] * weightA + rgbB[2] * weightB) / (weightA + weightB);
+
+	// // even out
+	// if (r < 1) {
+	// 	diff = 1 / r;
+	// 	r *= diff;
+	// 	g *= diff;
+	// 	b *= diff;
+	// }
+	// if (g < 1) {
+	// 	diff = 1 / g;
+	// 	r *= diff;
+	// 	g *= diff;
+	// 	b *= diff;
+	// }
+	// if (b < 1) {
+	// 	diff = 1 / b;
+	// 	r *= diff;
+	// 	g *= diff;
+	// 	b *= diff;
+	// }
+
+	return [r, g, b];
+}
 
 function renderRGB(rgb) {
 	var i, c,
@@ -110,85 +154,66 @@ function CMYKtoRGB(_c, _m, _y, _k) {
 }
 
 function RBGYCtoRGB(_r, _b, _g, _y, _c) {
-	var r, g, b,
+	var ratioAC, ratioBD,
+		rg, by,
+		rgb,
 		diff;
 
-	// init
-	r = 0;
-	g = 0;
-	b = 0;
+	// find ratio between first and third primary color
+	// in the range [-1, 1]
+	ratioAC = _r - _g;
+	// find ratio between first and third primary color
+	// in the range [-1, 1]
+	ratioBD = _b - _y;
 
-	// apply red, which is RGB(1,0,0)
-	r += _r * 1;
-	g += _g * 0;
-	b += _b * 0;
-	// apply green, which is RGB(0,1,0)
-	r += _r * 0;
-	g += _g * 1;
-	b += _b * 0;
-	// when red and green is neutralizing each other, they will tend to white;
-	// thus, blue must be added, and must be equal to the least of _r and _g.
-	b += Math.min(_r, _g) * 1;
-	// apply blue, which is RGB(0,0,1)
-	r += _r * 0;
-	g += _g * 0;
-	b += _b * 1;
-	if (b > 1) {
-		diff = b - 1;
-		r -= diff;
-		g -= diff;
-		b -= diff;
-	}
-	// apply yellow, which is RGB(1,1,0)
-	r += _y * 1;
-	g += _y * 1;
-	b += _y * 0;
+	rg = mixRGB(
+		ratioAC > 0 ? primaryColors[0] : primaryColors[2],
+		Math.abs(ratioAC),
+		neutralColor,
+		// 0
+		1 - Math.abs(ratioAC)
+	)
+
+	by = mixRGB(
+		ratioBD > 0 ? primaryColors[1] : primaryColors[3],
+		Math.abs(ratioBD),
+		neutralColor,
+		// 0
+		1 - Math.abs(ratioBD)
+	)
+
+	rgb = mixRGB(rg, Math.abs(ratioAC), by, Math.abs(ratioBD));
+	// rgb = mixRGB(rg, 0, by, 1);
+
+	// will fix key application
+	r = rgb[0];
+	g = rgb[1];
+	b = rgb[2];
+	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
+	r += _c * r;
+	g += _c * g;
+	b += _c * b;
 	if (r > 1) {
 		diff = r - 1;
 		r -= diff;
-		g -= diff;
-		b -= diff;
+		g += diff * (1 - g);
+		b += diff * (1 - b);
 	}
 	if (g > 1) {
 		diff = g - 1;
-		r -= diff;
+		r += diff * (1 - r);
 		g -= diff;
+		b += diff * (1 - b);
+	}
+	if (b > 1) {
+		diff = b - 1;
+		r += diff * (1 - r);
+		g += diff * (1 - g);
 		b -= diff;
 	}
-	// if (r > 1) {
-	// 	diff = r - 1;
-	// 	r -= diff;
-	// 	g -= diff / 2;
-	// }
-	// if (g > 1) {
-	// 	diff = g - 1;
-	// 	r -= diff / 2;
-	// 	g -= diff;
-	// }
-	// apply key, which is RGB(0,0,0)-RGB(1,1,1)
-	// r += _c * r;
-	// g += _c * g;
-	// b += _c * b;
-	// if (r > 1) {
-	// 	diff = r - 1;
-	// 	r -= diff;
-	// 	g += diff * (1 - g);
-	// 	b += diff * (1 - b);
-	// }
-	// if (g > 1) {
-	// 	diff = g - 1;
-	// 	r += diff * (1 - r);
-	// 	g -= diff;
-	// 	b += diff * (1 - b);
-	// }
-	// if (b > 1) {
-	// 	diff = b - 1;
-	// 	r += diff * (1 - r);
-	// 	g += diff * (1 - g);
-	// 	b -= diff;
-	// }
+	rgb = [r, g, b];
 
-	return [r, g, b];
+	return rgb;
 }
 
 function updateInfo(id, rgb) {
