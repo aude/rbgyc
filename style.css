@@ -4,7 +4,6 @@ body {
 }
 
 header {
-	background-color: red;
 	width: 100%;
 	font-size: 2em;
 }
@@ -18,6 +17,15 @@ header ul {
 header ul li {
 	margin: 0 0.5em;
 	list-style-type: none;
+}
+
+footer {
+	display: flex;
+	justify-content: center;
+}
+
+section a {
+	font-size: 2em;
 }
 
 section {
