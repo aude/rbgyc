@@ -170,20 +170,22 @@ function RBGYCtoRGB(_r, _b, _g, _y, _c) {
 		ratioAC > 0 ? primaryColors[0] : primaryColors[2],
 		Math.abs(ratioAC),
 		neutralColor,
-		// 0
-		1 - Math.abs(ratioAC)
+		0
+		// 1 - Math.abs(ratioAC)
 	)
 
 	by = mixRGB(
 		ratioBD > 0 ? primaryColors[1] : primaryColors[3],
 		Math.abs(ratioBD),
 		neutralColor,
-		// 0
-		1 - Math.abs(ratioBD)
+		0
+		// 1 - Math.abs(ratioBD)
 	)
 
 	rgb = mixRGB(rg, Math.abs(ratioAC), by, Math.abs(ratioBD));
 	// rgb = mixRGB(rg, 0, by, 1);
+
+	// rgb = mixRGB(rgb, Math.abs(ratioAC) + Math.abs(ratioBD), neutralColor, 2);
 
 	// will fix key application
 	r = rgb[0];
