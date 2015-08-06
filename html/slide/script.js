@@ -27,25 +27,25 @@ function mixRGB(rgbA, weightA, rgbB, weightB) {
 	g = (rgbA[1] * weightA + rgbB[1] * weightB) / (weightA + weightB);
 	b = (rgbA[2] * weightA + rgbB[2] * weightB) / (weightA + weightB);
 
-	// // even out
-	// if (r < 1) {
-	// 	diff = 1 / r;
-	// 	r *= diff;
-	// 	g *= diff;
-	// 	b *= diff;
-	// }
-	// if (g < 1) {
-	// 	diff = 1 / g;
-	// 	r *= diff;
-	// 	g *= diff;
-	// 	b *= diff;
-	// }
-	// if (b < 1) {
-	// 	diff = 1 / b;
-	// 	r *= diff;
-	// 	g *= diff;
-	// 	b *= diff;
-	// }
+	 // even out
+	 if (r >= g && r >= b && r < 1) {
+		 diff = 1 / r;
+		 r *= diff;
+		 g *= diff;
+		 b *= diff;
+	 }
+	 if (g >= r && g >= b && g < 1) {
+		 diff = 1 / g;
+		 r *= diff;
+		 g *= diff;
+		 b *= diff;
+	 }
+	 if (b >= r && b >= g && b < 1) {
+		 diff = 1 / b;
+		 r *= diff;
+		 g *= diff;
+		 b *= diff;
+	 }
 
 	return [r, g, b];
 }
