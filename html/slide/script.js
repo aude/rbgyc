@@ -7,11 +7,12 @@ var i, c,
 	],
 	neutralColor = [1, 1, 1],
 	observeIds = [
+        'hex-t',
 		'rgb-rt', 'rgb-rs', 'rgb-gt', 'rgb-gs', 'rgb-bt', 'rgb-bs',
 		'cmyk-ct', 'cmyk-cs', 'cmyk-mt', 'cmyk-ms', 'cmyk-yt', 'cmyk-ys', 'cmyk-kt', 'cmyk-ks',
 		'rbgyc-rt', 'rbgyc-rs', 'rbgyc-bt', 'rbgyc-bs', 'rbgyc-gt', 'rbgyc-gs', 'rbgyc-yt', 'rbgyc-ys', 'rbgyc-ct', 'rbgyc-cs'
 	],
-	hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+	hexChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
 
 function mixRGB(rgbA, weightA, rgbB, weightB) {
 	var r = 0,
@@ -91,8 +92,8 @@ function RGBtoHEX(rgb) {
 	var i,
 		out = '#';
 	for (i = 0; i <= 2; ++i) {
-		out += hex[Math.floor(Math.round(rgb[i] * 255) / 16) % 16] +
-				hex[Math.round(rgb[i] * 255) % 16];
+		out += hexChars[Math.floor(Math.round(rgb[i] * 255) / 16) % 16] +
+				hexChars[Math.round(rgb[i] * 255) % 16];
 	}
 	return out;
 }
@@ -143,8 +144,22 @@ function RGBtoCMY(rgb) {
 	return [c, m, y];
 }
 
+// input must be uppercase
+function HEXtoRGB(hex) {
+    r = hex.substr(0, 2);
+    r = (hexChars.indexOf(r[0]) * 16 + hexChars.indexOf(r[1])) / 255;
+
+    g = hex.substr(2, 2);
+    g = (hexChars.indexOf(g[0]) * 16 + hexChars.indexOf(g[1])) / 255;
+
+    b = hex.substr(4, 2);
+    b = (hexChars.indexOf(b[0]) * 16 + hexChars.indexOf(b[1])) / 255;
+
+    return [r, g, b];
+}
+
 function CMYKtoRGB(_c, _m, _y, _k) {
-	// RGB is just inverted RGB, with Key added (optionally, as we're in an ideal world: on a computer)
+	// CMYK is just inverted RGB, with Key added (optionally, as we're in an ideal world: on a computer)
 	var r, g, b;
 	// ~http://www.rapidtables.com/convert/color/cmyk-to-rgb.htm
 	r = (1 - _c) * (1 - _k);
@@ -229,11 +244,37 @@ function updateInfo(id, rgb) {
 	document.getElementById(id + '-cmyk').textContent = renderCMYK(RGBtoCMYK(rgb));
 }
 
+function updateHEX() {
+	var i,
+        hex, rgb;
+
+    hex = document.getElementById('hex-t').value;
+
+    // keep hex in uppercase
+    hex = hex.toUpperCase();
+
+    // hex can optionally start with '#'
+    if (hex.substr(0, 1) === '#') {
+        hex = hex.substr(1);
+    }
+
+    // validate
+    if (/^[0-9A-F]{6}$/.test(hex)) {
+        rgb = HEXtoRGB(hex);
+    // if not valid, set to white
+    } else {
+        rgb = [1, 1, 1];
+    }
+
+	updateShow('show-hex', rgb);
+	updateInfo('hex', rgb);
+}
+
 function updateRGB() {
 	var i, rgb;
 
-	i = 0 - 2;
-	// go from 0-100 to 0-1
+	i = observeIds.indexOf('rgb-rt') - 2;
+	// translate 0-255 to 0-1
 	rgb = [
 		parseInt(document.getElementById(observeIds[i+=2]).value, 10) / 255,
 		parseInt(document.getElementById(observeIds[i+=2]).value, 10) / 255,
@@ -249,8 +290,8 @@ function updateCMYK() {
 		c, m, y, k,
 		rgb;
 
-	i = 6 - 2;
-	// go from 0-100 to 0-1
+	i = observeIds.indexOf('cmyk-ct') - 2;
+	// translate 0-100 to 0-1
 	c = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
 	m = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
 	y = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
@@ -266,10 +307,9 @@ function updateRBGYC() {
 	var i,
 		r, b, g, y, c,
 		rgb;
-		r, b, g, y, c;
 
-	i = 14 - 2;
-	// go from 0-100 to 0-1
+	i = observeIds.indexOf('rbgyc-rt') - 2;
+	// translate 0-100 to 0-1
 	r = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
 	b = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
 	g = parseFloat(document.getElementById(observeIds[i+=2]).value, 10) / 100;
@@ -281,13 +321,16 @@ function updateRBGYC() {
 }
 
 function update() {
-	if (this !== window) {
+	if (this === window) {
+    } else if (this.id.substr(0, 3) === 'hex') {
+    } else {
 		var thisId = this.id,
 			complId = thisId.substr(0, thisId.length-1) + (thisId.substr(-1, 1) == 't' ? 's' : 't');
 
 		document.getElementById(complId).value = this.value;
 	}
 
+	updateHEX();
 	updateRGB();
 	updateCMYK();
 	updateRBGYC();

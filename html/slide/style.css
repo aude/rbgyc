@@ -1,42 +1,24 @@
+html {
+    margin: 0;
+	height: 100%;
+}
 body {
-	margin: 0;
-	height: 100vh;
+    margin: 0;
+	min-height: 100%;
 }
 
-header {
-	width: 100%;
-	font-size: 2em;
-}
-
-header ul {
-	margin: 0;
+body, main {
 	display: flex;
-	justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-header ul li {
-	margin: 0 0.5em;
-	list-style-type: none;
-}
-
-footer {
-	display: flex;
-	justify-content: center;
-}
-
-section a {
-	font-size: 2em;
+main thead th {
+    text-align: left;
 }
 
 section {
-	height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-}
-
-div {
 	padding: 2em;
 }
 
@@ -46,4 +28,9 @@ div {
 
 .info {
 	width: 20em;
+}
+
+footer {
+	font-size: 1.2em;
+	margin: 2em;
 }
